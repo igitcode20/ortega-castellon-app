@@ -1,0 +1,57 @@
+:root {
+  --primary-blue: #0084cc;
+  --primary-green: #8cc63f;
+  --bg-main: #f4f7f6;
+  --bg-card: #ffffff;
+  --text-main: #2d3748;
+  --text-muted: #718096;
+  --border-color: #e2e8f0;
+}
+
+[data-theme="dark"] {
+  --bg-main: #0f172a;
+  --bg-card: #1e293b;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border-color: #334155;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+}
+
+input, select, textarea {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px;
+  outline: none;
+  width: 100%;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 2px rgba(0, 132, 204, 0.2);
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  transition: transform 0.1s ease, background-color 0.2s ease;
+}
+
+button:active {
+  transform: scale(0.98);
+}
