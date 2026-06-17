@@ -1,5 +1,7 @@
+// src/views/Inicio.jsx
+
 import React, { useState, useEffect } from 'react';
-import { Stethoscope, Clock, MapPin, UserPlus, LogIn, CheckCircle, Lock } from 'lucide-react';
+import { Stethoscope, Clock, MapPin, CheckCircle, Target, Eye, Shield } from 'lucide-react';
 
 const Inicio = ({ theme, setActiveTab }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -13,80 +15,247 @@ const Inicio = ({ theme, setActiveTab }) => {
   }, []);
 
   const isDark = theme === 'dark';
-  const colors = {
-    text: isDark ? '#f1f5f9' : '#334155',
-    cardBg: isDark ? '#1e293b' : '#f8fafc',
-    accent: '#0084cc',
-    notifBg: isDark ? 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)' : 'linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%)',
-    notifBorder: isDark ? '#334155' : '#bae6fd'
-  };
 
   return (
-    <div style={{ color: colors.text }}>
-      {/* Notificación elegante y moderna */}
-      <div style={{ 
-        margin: '20px auto',
-        padding: '25px',
-        maxWidth: '800px',
-        background: colors.notifBg,
-        border: `1px solid ${colors.notifBorder}`,
-        borderRadius: '20px',
-        textAlign: 'center',
-        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-        transition: '0.3s'
+    <div style={{ 
+      color: 'var(--text-main)',
+      padding: '0 4px',
+      maxWidth: '100%',
+      overflowX: 'hidden'
+    }}>
+      
+      {/* Misión, Visión y Valores - Responsivo */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
+        gap: '16px',
+        marginBottom: '24px'
       }}>
-        <div style={{ color: colors.accent, marginBottom: '10px' }}>
-          <Lock size={30} />
+        {/* Misión */}
+        <div className="card" style={{ textAlign: 'center' }}>
+          <div style={{ 
+            backgroundColor: 'var(--primary-blue)',
+            width: '50px',
+            height: '50px',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 12px auto'
+          }}>
+            <Target size={24} color="white" />
+          </div>
+          <h3 style={{ color: 'var(--primary-blue)', marginBottom: '8px', fontSize: 'clamp(1rem, 2.5vw, 1.2rem)' }}>🎯 Misión</h3>
+          <p style={{ fontSize: 'clamp(0.85rem, 2vw, 0.95rem)', lineHeight: '1.6', color: 'var(--text-muted)', margin: 0 }}>
+            Brindar atención médica integral y acceso a medicamentos de calidad, 
+            con calidez humana y tecnología innovadora.
+          </p>
         </div>
-        <h3 style={{ margin: '0 0 10px 0', color: isDark ? '#f1f5f9' : '#0369a1' }}>¡Bienvenido a tu Clínica Digital!</h3>
-        <p style={{ margin: '0 0 20px 0', fontSize: '1rem', color: isDark ? '#94a3b8' : '#075985' }}>
-          Regístrate o inicia sesión para desbloquear el control de tus citas, acceso a farmacia y muro informativo.
-        </p>
-        <button onClick={() => setActiveTab('cuenta')} style={{ 
-          padding: '10px 25px', 
-          background: colors.accent, 
-          color: 'white', 
-          border: 'none', 
-          borderRadius: '50px', 
-          fontWeight: 'bold',
-          cursor: 'pointer' 
-        }}>
-          Comenzar ahora
-        </button>
+
+        {/* Visión */}
+        <div className="card" style={{ textAlign: 'center' }}>
+          <div style={{ 
+            backgroundColor: 'var(--primary-green)',
+            width: '50px',
+            height: '50px',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 12px auto'
+          }}>
+            <Eye size={24} color="white" />
+          </div>
+          <h3 style={{ color: 'var(--primary-green)', marginBottom: '8px', fontSize: 'clamp(1rem, 2.5vw, 1.2rem)' }}>👁️ Visión</h3>
+          <p style={{ fontSize: 'clamp(0.85rem, 2vw, 0.95rem)', lineHeight: '1.6', color: 'var(--text-muted)', margin: 0 }}>
+            Ser el consultorio médico y farmacia de referencia en Juigalpa, 
+            reconocido por excelencia, innovación y compromiso.
+          </p>
+        </div>
+
+        {/* Valores */}
+        <div className="card" style={{ textAlign: 'center' }}>
+          <div style={{ 
+            background: 'linear-gradient(135deg, var(--primary-blue), var(--primary-green))',
+            width: '50px',
+            height: '50px',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 12px auto'
+          }}>
+            <Shield size={24} color="white" />
+          </div>
+          <h3 style={{ color: 'var(--primary-blue)', marginBottom: '8px', fontSize: 'clamp(1rem, 2.5vw, 1.2rem)' }}>💎 Valores</h3>
+          <ul style={{ 
+            listStyle: 'none', 
+            padding: 0, 
+            margin: 0,
+            fontSize: 'clamp(0.85rem, 2vw, 0.95rem)',
+            color: 'var(--text-muted)',
+            textAlign: 'left',
+            display: 'inline-block'
+          }}>
+            <li style={{ padding: '4px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ color: 'var(--primary-green)', fontWeight: 'bold' }}>✓</span> Excelencia en el servicio
+            </li>
+            <li style={{ padding: '4px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ color: 'var(--primary-green)', fontWeight: 'bold' }}>✓</span> Calidez y empatía
+            </li>
+            <li style={{ padding: '4px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ color: 'var(--primary-green)', fontWeight: 'bold' }}>✓</span> Innovación tecnológica
+            </li>
+            <li style={{ padding: '4px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ color: 'var(--primary-green)', fontWeight: 'bold' }}>✓</span> Compromiso comunitario
+            </li>
+          </ul>
+        </div>
       </div>
 
-      <header style={{ padding: '20px 0', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '2rem', color: colors.accent, margin: 0 }}>Consultorio Clínico y Farmacia</h1>
-        <h2 style={{ fontSize: '1.2rem', margin: 0 }}>Ortega Castellón</h2>
+      {/* Header */}
+      <header style={{ padding: '16px 0', textAlign: 'center' }}>
+        <h1 style={{ 
+          fontSize: 'clamp(1.5rem, 5vw, 2.2rem)', 
+          color: 'var(--primary-blue)', 
+          margin: 0 
+        }}>
+          Consultorio Clínico y Farmacia
+        </h1>
+        <h2 style={{ 
+          fontSize: 'clamp(1rem, 3vw, 1.4rem)', 
+          margin: '4px 0 0 0', 
+          color: 'var(--primary-green)' 
+        }}>
+          Ortega Castellón
+        </h2>
       </header>
 
-      <section style={{ margin: '20px 0' }}>
-        <div style={{ borderRadius: '15px', overflow: 'hidden', height: '350px', position: 'relative' }}>
+      {/* Carrusel - Responsivo */}
+      <section style={{ margin: '16px 0' }}>
+        <div style={{ 
+          borderRadius: '12px', 
+          overflow: 'hidden', 
+          height: 'clamp(200px, 40vw, 350px)', 
+          position: 'relative',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
+        }}>
           {images.map((img, index) => (
-            <img key={index} src={img} alt="Local" style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', transition: 'opacity 1s', opacity: currentSlide === index ? 1 : 0 }} />
+            <img 
+              key={index} 
+              src={img} 
+              alt="Local" 
+              style={{ 
+                width: '100%', 
+                height: '100%', 
+                objectFit: 'cover', 
+                position: 'absolute', 
+                transition: 'opacity 0.8s ease', 
+                opacity: currentSlide === index ? 1 : 0 
+              }} 
+            />
           ))}
+          {/* Indicadores */}
+          <div style={{
+            position: 'absolute',
+            bottom: '12px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            display: 'flex',
+            gap: '8px',
+            zIndex: 2
+          }}>
+            {images.map((_, idx) => (
+              <div
+                key={idx}
+                style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  backgroundColor: currentSlide === idx ? 'white' : 'rgba(255,255,255,0.4)',
+                  transition: 'all 0.3s ease'
+                }}
+              />
+            ))}
+          </div>
         </div>
       </section>
 
-      <section style={{ textAlign: 'center', margin: '40px 0' }}>
-        <h3 style={{ fontSize: '1.6rem', color: colors.accent }}>¿Por qué nuestra Clínica Digital?</h3>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap', marginTop: '20px' }}>
+      {/* Beneficios */}
+      <section style={{ textAlign: 'center', margin: '30px 0' }}>
+        <h3 style={{ 
+          fontSize: 'clamp(1.2rem, 3.5vw, 1.8rem)', 
+          color: 'var(--primary-blue)',
+          marginBottom: '16px'
+        }}>
+          ¿Por qué nuestra Clínica Digital?
+        </h3>
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', 
+          gap: '16px', 
+          marginTop: '16px' 
+        }}>
           {[
-            { title: "Gestión Fácil", desc: "Agenda tus citas sin salir de casa." },
-            { title: "Seguimiento", desc: "Control total de tu historial y estado de citas." },
-            { title: "Acceso a Farmacia", desc: "Consulta disponibilidad de medicamentos online." }
+            { 
+              title: "Gestión Fácil", 
+              desc: "Agenda tus citas sin salir de casa en minutos.",
+              icon: <CheckCircle size={28} color="var(--primary-blue)" />
+            },
+            { 
+              title: "Seguimiento", 
+              desc: "Control total de tu historial y estado de citas.",
+              icon: <Stethoscope size={28} color="var(--primary-green)" />
+            },
+            { 
+              title: "Acceso a Farmacia", 
+              desc: "Consulta disponibilidad de medicamentos online.",
+              icon: <CheckCircle size={28} color="var(--primary-blue)" />
+            }
           ].map((b, i) => (
-            <div key={i} style={{ padding: '20px', background: colors.cardBg, borderRadius: '10px', width: '250px', border: `1px solid ${isDark ? '#334155' : '#e2e8f0'}` }}>
-              <CheckCircle color={colors.accent} size={24} />
-              <h4 style={{ margin: '10px 0' }}>{b.title}</h4>
-              <p style={{ fontSize: '0.9rem' }}>{b.desc}</p>
+            <div key={i} className="card" style={{ 
+              padding: '20px 16px',
+              textAlign: 'center'
+            }}>
+              <div style={{ marginBottom: '8px' }}>{b.icon}</div>
+              <h4 style={{ margin: '8px 0', color: 'var(--primary-blue)', fontSize: 'clamp(0.95rem, 2vw, 1.1rem)' }}>{b.title}</h4>
+              <p style={{ fontSize: 'clamp(0.8rem, 1.8vw, 0.9rem)', margin: 0, color: 'var(--text-muted)' }}>{b.desc}</p>
             </div>
           ))}
         </div>
       </section>
-      
-      <div style={{ textAlign: 'center', marginTop: '30px', color: '#64748b' }}>
-        <MapPin size={18} /> Juigalpa, Chontales, Barrio San Antonio, segunda entrada, 1 Cuadra al Este.
+
+      {/* Ubicación - Responsive */}
+      <div className="card" style={{ 
+        textAlign: 'center', 
+        marginTop: '16px',
+        padding: '16px'
+      }}>
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          gap: '8px',
+          flexWrap: 'wrap'
+        }}>
+          <MapPin size={18} style={{ color: 'var(--primary-blue)', flexShrink: 0 }} />
+          <span style={{ color: 'var(--text-muted)', fontSize: 'clamp(0.85rem, 2vw, 0.95rem)' }}>
+            Juigalpa, Chontales, Barrio San Antonio, segunda entrada, 1 Cuadra al Este.
+          </span>
+        </div>
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          gap: '8px',
+          marginTop: '6px',
+          flexWrap: 'wrap'
+        }}>
+          <Clock size={16} style={{ color: 'var(--primary-green)', flexShrink: 0 }} />
+          <span style={{ color: 'var(--text-muted)', fontSize: 'clamp(0.8rem, 1.8vw, 0.9rem)' }}>
+            Lunes a Sábado: 8:00 AM - 6:00 PM
+          </span>
+        </div>
       </div>
     </div>
   );
