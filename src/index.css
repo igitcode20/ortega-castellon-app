@@ -1,4 +1,4 @@
-/* src/index.css */
+/* src/index.css - Tamaño de letra intermedio */
 
 :root {
   --primary-blue: #0084cc;
@@ -31,7 +31,7 @@
 }
 
 html {
-  font-size: 16px;
+  font-size: 16px; /* Tamaño base intermedio */
   -webkit-text-size-adjust: 100%;
 }
 
@@ -46,11 +46,39 @@ body {
 }
 
 /* ============================================
-   INPUTS Y FORMULARIOS RESPONSIVOS
+   TIPOGRAFÍA - TAMAÑO INTERMEDIO
+   ============================================ */
+h1 {
+  font-size: 1.8rem !important;
+  font-weight: 800;
+}
+
+h2 {
+  font-size: 1.5rem !important;
+  font-weight: 700;
+}
+
+h3 {
+  font-size: 1.2rem !important;
+  font-weight: 700;
+}
+
+h4 {
+  font-size: 1.05rem !important;
+  font-weight: 600;
+}
+
+p {
+  font-size: 0.95rem !important;
+  line-height: 1.6;
+}
+
+/* ============================================
+   INPUTS Y FORMULARIOS
    ============================================ */
 input, select, textarea, button {
   font-family: inherit;
-  font-size: 1rem;
+  font-size: 0.95rem;
 }
 
 input, select, textarea {
@@ -71,20 +99,8 @@ input:focus, select:focus, textarea:focus {
   box-shadow: 0 0 0 3px rgba(0, 132, 204, 0.15);
 }
 
-textarea {
-  resize: vertical;
-  min-height: 80px;
-}
-
-select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 16px center;
-  padding-right: 40px;
-}
-
 /* ============================================
-   BOTONES RESPONSIVOS
+   BOTONES
    ============================================ */
 button {
   cursor: pointer;
@@ -93,7 +109,7 @@ button {
   font-weight: 600;
   transition: var(--transition);
   padding: 10px 18px;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -103,18 +119,8 @@ button {
   touch-action: manipulation;
 }
 
-button:active {
-  transform: scale(0.97);
-}
-
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
 /* ============================================
-   TARJETAS Y CONTENEDORES
+   TARJETAS
    ============================================ */
 .card {
   background-color: var(--bg-card);
@@ -125,148 +131,40 @@ button:disabled {
   transition: var(--transition);
 }
 
-.card:hover {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-}
-
 /* ============================================
-   GRID RESPONSIVO
-   ============================================ */
-.responsive-grid {
-  display: grid;
-  gap: 20px;
-}
-
-.responsive-grid-2 {
-  grid-template-columns: 1fr 1fr;
-}
-
-.responsive-grid-3 {
-  grid-template-columns: repeat(3, 1fr);
-}
-
-.responsive-grid-4 {
-  grid-template-columns: repeat(4, 1fr);
-}
-
-/* ============================================
-   SCROLLBAR PERSONALIZADA
-   ============================================ */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--bg-main);
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--primary-blue);
-}
-
-/* ============================================
-   RESPONSIVE - TABLETS Y MÓVILES
+   RESPONSIVE
    ============================================ */
 
-/* Tablets (768px - 1024px) */
+/* Tablets */
 @media (max-width: 1024px) {
-  .responsive-grid-4 {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .responsive-grid-3 {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  html {
-    font-size: 15px;
-  }
-  
-  .card {
-    padding: 16px;
-  }
+  html { font-size: 15px; }
+  .card { padding: 18px; }
 }
 
-/* Móviles grandes (480px - 768px) */
+/* Móviles grandes */
 @media (max-width: 768px) {
-  .responsive-grid-2,
-  .responsive-grid-3,
-  .responsive-grid-4 {
-    grid-template-columns: 1fr;
-  }
-  
-  html {
-    font-size: 14px;
-  }
-  
-  .card {
-    padding: 14px;
-    border-radius: 10px;
-  }
-  
-  input, select, textarea {
-    padding: 10px 14px;
-    font-size: 0.95rem;
-  }
-  
-  button {
-    padding: 10px 16px;
-    font-size: 0.85rem;
-    min-height: 40px;
-  }
-  
-  /* Ajustes de padding general */
-  body {
-    padding: 0;
-  }
+  html { font-size: 14px; }
+  h1 { font-size: 1.5rem !important; }
+  h2 { font-size: 1.3rem !important; }
+  h3 { font-size: 1.1rem !important; }
+  h4 { font-size: 0.95rem !important; }
+  p { font-size: 0.9rem !important; }
+  .card { padding: 16px; }
+  input, select, textarea { padding: 10px 14px; font-size: 0.9rem; }
+  button { padding: 8px 16px; font-size: 0.9rem; min-height: 40px; }
 }
 
-/* Móviles pequeños (menos de 480px) */
+/* Móviles pequeños */
 @media (max-width: 480px) {
-  html {
-    font-size: 13px;
-  }
-  
-  .card {
-    padding: 12px;
-    border-radius: 8px;
-  }
-  
-  input, select, textarea {
-    padding: 8px 12px;
-    font-size: 0.9rem;
-    border-radius: 8px;
-  }
-  
-  button {
-    padding: 8px 14px;
-    font-size: 0.8rem;
-    min-height: 36px;
-    border-radius: 8px;
-  }
-  
-  h1 {
-    font-size: 1.5rem !important;
-  }
-  
-  h2 {
-    font-size: 1.2rem !important;
-  }
-  
-  h3 {
-    font-size: 1rem !important;
-  }
-  
-  h4 {
-    font-size: 0.9rem !important;
-  }
+  html { font-size: 13px; }
+  h1 { font-size: 1.3rem !important; }
+  h2 { font-size: 1.1rem !important; }
+  h3 { font-size: 1rem !important; }
+  h4 { font-size: 0.9rem !important; }
+  p { font-size: 0.85rem !important; }
+  .card { padding: 14px; }
+  input, select, textarea { padding: 8px 12px; font-size: 0.85rem; }
+  button { padding: 8px 14px; font-size: 0.85rem; min-height: 36px; }
 }
 
 /* ============================================
@@ -318,11 +216,12 @@ button:disabled {
   animation: fadeIn 0.3s ease;
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
 }
 
-.pulse {
-  animation: pulse 2s infinite;
+@keyframes bounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-8px); }
 }

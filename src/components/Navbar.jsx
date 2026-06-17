@@ -4,12 +4,14 @@ import React, { useState, useEffect } from 'react';
 import { 
   Sun, Moon, Menu, X, BookOpen, ShoppingBag, Calendar, 
   Info, MapPin, UserCheck, ShoppingCart, Package, 
-  BarChart3, LayoutDashboard, Heart 
+  BarChart3, LayoutDashboard, Heart, LogOut, ChevronDown, ChevronUp,
+  PlusCircle
 } from 'lucide-react';
 
 export default function Navbar({ activeTab, setActiveTab, theme, toggleTheme, user, handleLogout, cartCount, isAdmin }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [showMore, setShowMore] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -20,6 +22,7 @@ export default function Navbar({ activeTab, setActiveTab, theme, toggleTheme, us
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Items principales del cliente
   const clientItems = [
     { id: 'inicio', label: 'Inicio', icon: <Info size={18} /> },
     { id: 'muro', label: 'Muro', icon: <BookOpen size={18} /> },
@@ -29,6 +32,7 @@ export default function Navbar({ activeTab, setActiveTab, theme, toggleTheme, us
     { id: 'contacto', label: 'Contacto', icon: <MapPin size={18} /> },
   ];
 
+  // Items de admin (siempre visibles)
   const adminItems = [
     { id: 'admin-dashboard', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
     { id: 'admin-citas', label: 'Citas', icon: <Calendar size={18} /> },
@@ -36,19 +40,53 @@ export default function Navbar({ activeTab, setActiveTab, theme, toggleTheme, us
     { id: 'admin-reportes', label: 'Reportes', icon: <BarChart3 size={18} /> },
   ];
 
+  // Items extras que aparecen con "Ver más" (Muro y Farmacia para admin)
+  const moreItems = [
+    { id: 'muro', label: 'Muro', icon: <BookOpen size={18} /> },
+    { id: 'farmacia', label: 'Farmacia', icon: <ShoppingBag size={18} /> },
+  ];
+
   const publicItems = [
     { id: 'inicio', label: 'Inicio', icon: <Info size={18} /> },
     { id: 'contacto', label: 'Contacto', icon: <MapPin size={18} /> },
   ];
 
+  // Construir navItems según rol
   let navItems = publicItems;
   if (user && !isAdmin) navItems = clientItems;
-  if (user && isAdmin) navItems = [...adminItems, ...clientItems.slice(0, 3)];
+  if (user && isAdmin) {
+    // Admin: mostrar adminItems + botón Ver más + (si showMore) moreItems
+    navItems = [
+      ...adminItems,
+      { 
+        id: 'ver-mas', 
+        label: showMore ? 'Ver menos' : 'Ver más', 
+        icon: showMore ? <ChevronUp size={18} /> : <ChevronDown size={18} />,
+        isMore: true 
+      },
+      ...(showMore ? moreItems : [])
+    ];
+  }
 
   const handleNavClick = (tabId) => {
+    if (tabId === 'ver-mas') {
+      setShowMore(!showMore);
+      return;
+    }
     setActiveTab(tabId);
     setIsOpen(false);
   };
+
+  // Items para el menú móvil
+  const getMobileItems = () => {
+    if (!user) return publicItems;
+    if (isAdmin) {
+      return [...adminItems, ...moreItems, ...clientItems];
+    }
+    return clientItems;
+  };
+
+  const mobileItems = getMobileItems();
 
   return (
     <nav style={{ 
@@ -75,7 +113,7 @@ export default function Navbar({ activeTab, setActiveTab, theme, toggleTheme, us
           <h1 
             onClick={() => handleNavClick('inicio')}
             style={{ 
-              fontSize: 'clamp(0.85rem, 2.5vw, 1.1rem)', 
+              fontSize: 'clamp(0.85rem, 2vw, 1.1rem)', 
               color: 'var(--primary-blue)', 
               fontWeight: '800', 
               lineHeight: 1.2,
@@ -83,11 +121,9 @@ export default function Navbar({ activeTab, setActiveTab, theme, toggleTheme, us
               margin: 0
             }}
           >
-            <span style={{ display: 'inline-block' }}>
-              Consultorio <span style={{ display: 'inline-block' }}>Clínico</span>
-            </span>
+            <span>Consultorio Clínico</span>
             <br />
-            <span style={{ color: 'var(--primary-green)', fontSize: 'clamp(0.75rem, 2vw, 1rem)' }}>
+            <span style={{ color: 'var(--primary-green)', fontSize: 'clamp(0.75rem, 1.6vw, 1rem)' }}>
               Ortega Castellón
             </span>
           </h1>
@@ -100,32 +136,59 @@ export default function Navbar({ activeTab, setActiveTab, theme, toggleTheme, us
           gap: '4px',
           flexWrap: 'wrap'
         }}>
-          {navItems.slice(0, isAdmin ? 4 : 5).map(item => (
-            <button
-              key={item.id}
-              onClick={() => handleNavClick(item.id)}
-              style={{
-                padding: '8px 12px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                backgroundColor: activeTab === item.id ? 'var(--primary-blue)' : 'transparent',
-                color: activeTab === item.id ? 'white' : 'var(--text-main)',
-                borderRadius: '8px',
-                fontSize: 'clamp(0.7rem, 1.2vw, 0.85rem)',
-                border: 'none',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                fontWeight: activeTab === item.id ? 'bold' : 'normal',
-                whiteSpace: 'nowrap'
-              }}
-            >
-              {item.icon} {item.label}
-            </button>
-          ))}
+          {navItems.map(item => {
+            if (item.isMore) {
+              return (
+                <button
+                  key="ver-mas"
+                  onClick={() => handleNavClick('ver-mas')}
+                  style={{
+                    padding: '6px 12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    backgroundColor: showMore ? 'var(--primary-blue)' : 'transparent',
+                    color: showMore ? 'white' : 'var(--text-muted)',
+                    borderRadius: '8px',
+                    fontSize: 'clamp(0.7rem, 1vw, 0.8rem)',
+                    border: showMore ? 'none' : '1px dashed var(--border-color)',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    whiteSpace: 'nowrap',
+                    fontWeight: showMore ? 'bold' : 'normal'
+                  }}
+                >
+                  {item.icon} {item.label}
+                </button>
+              );
+            }
+            return (
+              <button
+                key={item.id}
+                onClick={() => handleNavClick(item.id)}
+                style={{
+                  padding: '6px 12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  backgroundColor: activeTab === item.id ? 'var(--primary-blue)' : 'transparent',
+                  color: activeTab === item.id ? 'white' : 'var(--text-main)',
+                  borderRadius: '8px',
+                  fontSize: 'clamp(0.7rem, 1vw, 0.85rem)',
+                  border: 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  fontWeight: activeTab === item.id ? 'bold' : '500',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                {item.icon} {item.label}
+              </button>
+            );
+          })}
 
           {user && isAdmin && (
-            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', padding: '0 4px' }}>|</span>
+            <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)', padding: '0 4px' }}>|</span>
           )}
 
           {!user ? (
@@ -139,7 +202,7 @@ export default function Navbar({ activeTab, setActiveTab, theme, toggleTheme, us
                 border: 'none',
                 cursor: 'pointer',
                 fontWeight: 'bold',
-                fontSize: 'clamp(0.7rem, 1.2vw, 0.85rem)',
+                fontSize: 'clamp(0.7rem, 1vw, 0.85rem)',
                 whiteSpace: 'nowrap'
               }}
             >
@@ -157,7 +220,7 @@ export default function Navbar({ activeTab, setActiveTab, theme, toggleTheme, us
                 border: 'none',
                 cursor: 'pointer',
                 fontWeight: 'bold',
-                fontSize: 'clamp(0.7rem, 1.2vw, 0.85rem)',
+                fontSize: 'clamp(0.7rem, 1vw, 0.85rem)',
                 whiteSpace: 'nowrap'
               }}
             >
@@ -185,7 +248,7 @@ export default function Navbar({ activeTab, setActiveTab, theme, toggleTheme, us
         <div style={{ 
           display: isMobile ? 'flex' : 'none',
           alignItems: 'center', 
-          gap: '12px'
+          gap: '10px'
         }}>
           {user && cartCount > 0 && (
             <span style={{ 
@@ -212,15 +275,14 @@ export default function Navbar({ activeTab, setActiveTab, theme, toggleTheme, us
             position: 'relative',
             zIndex: 101
           }}>
-            {isOpen ? <X size={28} /> : <Menu size={28} />}
+            {isOpen ? <X size={26} /> : <Menu size={26} />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Menu Overlay */}
+      {/* Mobile Menu */}
       {isOpen && isMobile && (
         <>
-          {/* Overlay oscuro */}
           <div 
             onClick={() => setIsOpen(false)}
             style={{
@@ -235,7 +297,6 @@ export default function Navbar({ activeTab, setActiveTab, theme, toggleTheme, us
             }}
           />
           
-          {/* Menú deslizable */}
           <div style={{
             position: 'fixed',
             top: 0,
@@ -244,15 +305,14 @@ export default function Navbar({ activeTab, setActiveTab, theme, toggleTheme, us
             height: '100vh',
             backgroundColor: 'var(--bg-card)',
             zIndex: 99,
-            padding: '20px 16px',
+            padding: '20px 16px 24px 16px',
             overflowY: 'auto',
             boxShadow: '-4px 0 30px rgba(0,0,0,0.15)',
             animation: 'slideIn 0.3s ease',
             display: 'flex',
-            flexDirection: 'column',
-            gap: '4px'
+            flexDirection: 'column'
           }}>
-            {/* Header del menú */}
+            {/* Header */}
             <div style={{
               display: 'flex',
               justifyContent: 'space-between',
@@ -264,7 +324,7 @@ export default function Navbar({ activeTab, setActiveTab, theme, toggleTheme, us
               <div>
                 <p style={{ 
                   fontWeight: 'bold', 
-                  fontSize: '1rem', 
+                  fontSize: '1.1rem', 
                   color: 'var(--primary-blue)',
                   margin: 0
                 }}>
@@ -272,11 +332,11 @@ export default function Navbar({ activeTab, setActiveTab, theme, toggleTheme, us
                 </p>
                 {user && (
                   <p style={{ 
-                    fontSize: '0.8rem', 
+                    fontSize: '0.85rem', 
                     color: 'var(--text-muted)',
-                    margin: 0
+                    margin: '2px 0 0 0'
                   }}>
-                    👋 Hola, {user.name}
+                    👋 Hola, <strong style={{ color: 'var(--primary-blue)' }}>{user.name}</strong>
                   </p>
                 )}
               </div>
@@ -286,8 +346,8 @@ export default function Navbar({ activeTab, setActiveTab, theme, toggleTheme, us
                   background: 'var(--bg-main)',
                   border: 'none',
                   borderRadius: '50%',
-                  width: '36px',
-                  height: '36px',
+                  width: '38px',
+                  height: '38px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -295,124 +355,150 @@ export default function Navbar({ activeTab, setActiveTab, theme, toggleTheme, us
                   color: 'var(--text-main)'
                 }}
               >
-                <X size={20} />
+                <X size={22} />
               </button>
             </div>
 
-            {/* Items del menú */}
-            {isAdmin && (
-              <>
+            {/* Items */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2px' }}>
+              {isAdmin && (
+                <>
+                  <div style={{ 
+                    fontSize: '0.65rem', 
+                    color: 'var(--text-muted)', 
+                    fontWeight: 'bold', 
+                    padding: '6px 4px 4px 4px',
+                    borderBottom: '1px solid var(--border-color)',
+                    marginBottom: '4px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px'
+                  }}>
+                    👑 Panel de Administración
+                  </div>
+                  {adminItems.map(item => (
+                    <button
+                      key={item.id}
+                      onClick={() => handleNavClick(item.id)}
+                      style={{
+                        width: '100%',
+                        padding: '12px 14px',
+                        textAlign: 'left',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        backgroundColor: activeTab === item.id ? 'var(--primary-blue)' : 'transparent',
+                        color: activeTab === item.id ? 'white' : 'var(--text-main)',
+                        borderRadius: '8px',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontWeight: activeTab === item.id ? 'bold' : '500',
+                        fontSize: '0.95rem'
+                      }}
+                    >
+                      <span style={{ width: '20px', display: 'flex', justifyContent: 'center' }}>
+                        {item.icon}
+                      </span>
+                      {item.label}
+                    </button>
+                  ))}
+                  
+                  {/* Separador para "Ver más" en móvil */}
+                  <div style={{ 
+                    fontSize: '0.65rem', 
+                    color: 'var(--text-muted)', 
+                    fontWeight: 'bold', 
+                    padding: '12px 4px 4px 4px',
+                    borderTop: '1px solid var(--border-color)',
+                    marginTop: '4px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px'
+                  }}>
+                    📱 Contenido
+                  </div>
+                </>
+              )}
+
+              {/* Mostrar todos los items en móvil (incluyendo Muro y Farmacia) */}
+              {(isAdmin ? [...moreItems, ...clientItems] : mobileItems).map(item => (
+                <button
+                  key={item.id}
+                  onClick={() => handleNavClick(item.id)}
+                  style={{
+                    width: '100%',
+                    padding: '12px 14px',
+                    textAlign: 'left',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    backgroundColor: activeTab === item.id ? 'var(--primary-blue)' : 'transparent',
+                    color: activeTab === item.id ? 'white' : 'var(--text-main)',
+                    borderRadius: '8px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontWeight: activeTab === item.id ? 'bold' : '500',
+                    fontSize: '0.95rem'
+                  }}
+                >
+                  <span style={{ width: '20px', display: 'flex', justifyContent: 'center' }}>
+                    {item.icon}
+                  </span>
+                  {item.label}
+                </button>
+              ))}
+
+              {/* Cerrar Sesión */}
+              {user && (
                 <div style={{ 
-                  fontSize: '0.7rem', 
-                  color: 'var(--text-muted)', 
-                  fontWeight: 'bold', 
-                  padding: '6px 0',
-                  borderBottom: '1px solid var(--border-color)',
-                  marginBottom: '4px'
+                  marginTop: 'auto',
+                  paddingTop: '12px',
+                  borderTop: '2px solid var(--border-color)'
                 }}>
-                  👑 Panel de Administración
-                </div>
-                {adminItems.map(item => (
-                  <button
-                    key={item.id}
-                    onClick={() => handleNavClick(item.id)}
-                    style={{
-                      width: '100%',
-                      padding: '12px 14px',
-                      textAlign: 'left',
+                  <button 
+                    onClick={handleLogout} 
+                    style={{ 
+                      width: '100%', 
+                      padding: '14px', 
+                      backgroundColor: '#fee2e2',
+                      color: '#dc2626',
+                      borderRadius: '8px',
+                      border: '1px solid #fecaca',
+                      cursor: 'pointer',
+                      fontWeight: 'bold',
+                      fontSize: '0.95rem',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '12px',
-                      backgroundColor: activeTab === item.id ? 'var(--primary-blue)' : 'transparent',
-                      color: activeTab === item.id ? 'white' : 'var(--text-main)',
-                      borderRadius: '10px',
-                      border: 'none',
-                      cursor: 'pointer',
-                      fontWeight: activeTab === item.id ? 'bold' : 'normal',
-                      fontSize: '0.95rem',
-                      transition: 'all 0.2s ease'
+                      justifyContent: 'center',
+                      gap: '8px'
                     }}
                   >
-                    {item.icon} {item.label}
+                    <LogOut size={18} /> Cerrar Sesión
                   </button>
-                ))}
-                <div style={{ 
-                  fontSize: '0.7rem', 
-                  color: 'var(--text-muted)', 
-                  fontWeight: 'bold', 
-                  padding: '12px 0 6px 0',
-                  borderTop: '1px solid var(--border-color)',
-                  marginTop: '4px'
-                }}>
-                  🏥 Cliente
                 </div>
-              </>
-            )}
+              )}
 
-            {(isAdmin ? clientItems : navItems).map(item => (
-              <button
-                key={item.id}
-                onClick={() => handleNavClick(item.id)}
-                style={{
-                  width: '100%',
-                  padding: '12px 14px',
-                  textAlign: 'left',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  backgroundColor: activeTab === item.id ? 'var(--primary-blue)' : 'transparent',
-                  color: activeTab === item.id ? 'white' : 'var(--text-main)',
-                  borderRadius: '10px',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontWeight: activeTab === item.id ? 'bold' : 'normal',
-                  fontSize: '0.95rem',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                {item.icon} {item.label}
-              </button>
-            ))}
-
-            <div style={{ 
-              marginTop: 'auto',
-              paddingTop: '16px',
-              borderTop: '1px solid var(--border-color)'
-            }}>
-              {!user ? (
-                <button 
-                  onClick={() => handleNavClick('cuenta')} 
-                  style={{ 
-                    width: '100%', 
-                    padding: '14px', 
-                    backgroundColor: 'var(--primary-green)', 
-                    color: 'white',
-                    borderRadius: '10px',
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontWeight: 'bold',
-                    fontSize: '1rem'
-                  }}
-                >
-                  Iniciar Sesión / Registrarse
-                </button>
-              ) : (
-                <button 
-                  onClick={handleLogout} 
-                  style={{ 
-                    width: '100%', 
-                    padding: '14px', 
-                    backgroundColor: '#ef4444', 
-                    color: 'white',
-                    borderRadius: '10px',
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontWeight: 'bold',
-                    fontSize: '1rem'
-                  }}
-                >
-                  Cerrar Sesión
-                </button>
+              {!user && (
+                <div style={{ 
+                  marginTop: 'auto',
+                  paddingTop: '12px',
+                  borderTop: '2px solid var(--border-color)'
+                }}>
+                  <button 
+                    onClick={() => handleNavClick('cuenta')} 
+                    style={{ 
+                      width: '100%', 
+                      padding: '14px', 
+                      backgroundColor: 'var(--primary-green)', 
+                      color: 'white',
+                      borderRadius: '8px',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontWeight: 'bold',
+                      fontSize: '0.95rem'
+                    }}
+                  >
+                    Iniciar Sesión / Registrarse
+                  </button>
+                </div>
               )}
             </div>
           </div>

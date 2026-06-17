@@ -75,38 +75,47 @@ export default function App() {
       {/* Banner de bienvenida - SOLO PARA NO LOGUEADOS */}
       {!user && activeTab !== 'cuenta' && (
         <div style={{
-          margin: '16px auto',
-          padding: '20px',
+          margin: 'clamp(12px, 2vw, 20px) auto',
+          padding: 'clamp(16px, 2vw, 25px) clamp(16px, 3vw, 30px)',
           maxWidth: '90%',
           width: '100%',
           maxWidth: '800px',
           background: 'linear-gradient(135deg, #0084cc12, #8cc63f12)',
           border: '1px solid var(--border-color)',
-          borderRadius: '16px',
+          borderRadius: 'clamp(14px, 2vw, 20px)',
           textAlign: 'center',
           boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
         }}>
           <div style={{ color: 'var(--primary-blue)', marginBottom: '8px' }}>
             <Lock size={28} />
           </div>
-          <h3 style={{ margin: '0 0 8px 0', color: 'var(--primary-blue)', fontSize: 'clamp(1rem, 2.5vw, 1.3rem)' }}>
+          <h3 style={{ 
+            margin: '0 0 8px 0', 
+            color: 'var(--primary-blue)', 
+            fontSize: 'clamp(1.1rem, 2.5vw, 1.5rem)' 
+          }}>
             ¡Bienvenido a tu Clínica Digital!
           </h3>
-          <p style={{ margin: '0 0 16px 0', fontSize: 'clamp(0.85rem, 2vw, 1rem)', color: 'var(--text-muted)' }}>
+          <p style={{ 
+            margin: '0 0 16px 0', 
+            fontSize: 'clamp(0.9rem, 1.8vw, 1.1rem)', 
+            color: 'var(--text-muted)' 
+          }}>
             Regístrate o inicia sesión para desbloquear el control de tus citas, acceso a farmacia y muro informativo.
           </p>
           <button 
             onClick={() => setActiveTab('cuenta')} 
             style={{
-              padding: '10px 28px',
+              padding: 'clamp(10px, 1.5vw, 14px) clamp(24px, 4vw, 36px)',
               background: 'var(--primary-blue)',
               color: 'white',
               border: 'none',
               borderRadius: '50px',
               fontWeight: 'bold',
               cursor: 'pointer',
-              fontSize: 'clamp(0.85rem, 2vw, 1rem)',
-              transition: 'transform 0.2s ease'
+              fontSize: 'clamp(0.9rem, 1.8vw, 1.1rem)',
+              transition: 'transform 0.2s ease',
+              minHeight: '48px'
             }}
             onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
             onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
@@ -119,13 +128,9 @@ export default function App() {
       <main style={{ 
         maxWidth: '1200px', 
         width: '100%', 
-        margin: '16px auto', 
-        padding: '0 16px', 
-        flex: 1,
-        '@media (max-width: 480px)': {
-          padding: '0 10px',
-          margin: '10px auto'
-        }
+        margin: 'clamp(12px, 2vw, 20px) auto', 
+        padding: '0 clamp(12px, 2vw, 24px)', 
+        flex: 1
       }}>
         
         {/* VISTAS PÚBLICAS */}
@@ -157,7 +162,7 @@ export default function App() {
 
       {/* Footer */}
       <div style={{ 
-        padding: '16px 20px', 
+        padding: 'clamp(12px, 1.5vw, 20px) clamp(16px, 3vw, 24px)', 
         textAlign: 'center', 
         borderTop: '1px solid var(--border-color)', 
         marginTop: 'auto',
@@ -166,23 +171,23 @@ export default function App() {
         <p style={{ 
           fontStyle: 'italic', 
           fontWeight: '600', 
-          fontSize: 'clamp(0.85rem, 2vw, 0.95rem)', 
+          fontSize: 'clamp(0.85rem, 1.5vw, 1rem)', 
           marginBottom: '4px' 
         }}>
           "Tu salud en manos expertas, tu bienestar es nuestra prioridad"
         </p>
         <p style={{ 
-          fontSize: 'clamp(0.7rem, 1.5vw, 0.8rem)', 
+          fontSize: 'clamp(0.7rem, 1.2vw, 0.85rem)', 
           fontWeight: 'bold', 
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'center', 
-          gap: '4px', 
+          gap: '6px', 
           color: 'var(--text-muted)',
           flexWrap: 'wrap'
         }}>
           © 2026 Todos los derechos reservados por SindyCastellon 
-          <Heart size={12} fill="#e53e3e" color="#e53e3e" />
+          <Heart size={14} fill="#e53e3e" color="#e53e3e" />
         </p>
       </div>
 
@@ -191,3 +196,6 @@ export default function App() {
     </div>
   );
 }
+
+// Helper para clamp en JS
+const clamp = (min, val, max) => Math.min(Math.max(min, val), max);
