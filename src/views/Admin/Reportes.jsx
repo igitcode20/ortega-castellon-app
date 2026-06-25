@@ -1,8 +1,8 @@
 // src/views/Admin/Reportes.jsx
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
-  BarChart3, Download, Calendar, TrendingUp, Users, 
+  BarChart3, Download, TrendingUp, Users, 
   Package, DollarSign, FileText, MapPin, ChevronDown, ChevronUp
 } from 'lucide-react';
 
@@ -12,23 +12,32 @@ export default function Reportes({ token, API_URL }) {
   const [loading, setLoading] = useState(false);
   const [showAllOrders, setShowAllOrders] = useState(false);
 
-  const fetchReport = async () => {
-    try {
-      setLoading(true);
-      const res = await fetch(`${API_URL}/orders/sales-report?period=${period}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await res.json();
-      setReportData(data);
-    } catch (error) {
-      console.error('Error cargando reporte:', error);
-      alert('❌ Error al cargar el reporte');
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    const controller = new AbortController();
 
-  useEffect(() => { fetchReport(); }, [period]);
+    const loadReport = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(`${API_URL}/orders/sales-report?period=${period}`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+          signal: controller.signal
+        });
+        if (!res.ok) throw new Error('Error cargando reporte');
+        const data = await res.json();
+        setReportData(data);
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          console.error('Error cargando reporte:', error);
+          alert('❌ Error al cargar el reporte');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void loadReport();
+    return () => controller.abort();
+  }, [period, API_URL, token]);
 
   const exportToCSV = () => {
     if (!reportData || !reportData.orders) return;

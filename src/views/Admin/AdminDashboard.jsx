@@ -1,7 +1,7 @@
 // src/views/Admin/AdminDashboard.jsx
 
-import React, { useState, useEffect } from 'react';
-import { Heart, Users, CalendarDays, Package, DollarSign, ShoppingBag } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Heart, Users, CalendarDays, Package, DollarSign, ShoppingBag, Award } from 'lucide-react';
 
 export default function AdminDashboard({ token, API_URL }) {
   const [stats, setStats] = useState({
@@ -50,15 +50,56 @@ export default function AdminDashboard({ token, API_URL }) {
     }
   };
 
-  useEffect(() => { loadStats(); }, []);
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      loadStats();
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [API_URL, token]);
 
   const cards = [
-    { icon: <Users size={20} color="#0284c7" />, label: 'Pacientes', value: stats.users, bg: '#e0f2fe' },
-    { icon: <CalendarDays size={20} color="#b45309" />, label: 'Citas Pendientes', value: stats.pendingAppointments, bg: '#fef3c7' },
-    { icon: <Package size={20} color="#8b5cf6" />, label: 'Pedidos', value: stats.totalOrders, bg: '#ede9fe' },
-    { icon: <DollarSign size={20} color="#22c55e" />, label: 'Ventas Totales', value: `C$${stats.totalSales.toFixed(2)}`, bg: '#dcfce7' },
-    { icon: <Heart size={20} color="#ef4444" fill="#ef4444" />, label: 'Reacciones', value: stats.likes, bg: '#fee2e2' },
-    { icon: <ShoppingBag size={20} color="#3b82f6" />, label: 'Productos', value: stats.totalProducts, bg: '#dbeafe' }
+    { 
+      icon: <Users size={22} color="#0284c7" />, 
+      label: 'Pacientes', 
+      value: stats.users, 
+      bg: '#e0f2fe',
+      borderColor: '#0284c7'
+    },
+    { 
+      icon: <CalendarDays size={22} color="#b45309" />, 
+      label: 'Citas Pendientes', 
+      value: stats.pendingAppointments, 
+      bg: '#fef3c7',
+      borderColor: '#b45309'
+    },
+    { 
+      icon: <Package size={22} color="#8b5cf6" />, 
+      label: 'Pedidos', 
+      value: stats.totalOrders, 
+      bg: '#ede9fe',
+      borderColor: '#8b5cf6'
+    },
+    { 
+      icon: <DollarSign size={22} color="#22c55e" />, 
+      label: 'Ventas Totales', 
+      value: `C$${stats.totalSales.toFixed(2)}`, 
+      bg: '#dcfce7',
+      borderColor: '#22c55e'
+    },
+    { 
+      icon: <Heart size={22} color="#ef4444" fill="#ef4444" />, 
+      label: 'Reacciones', 
+      value: stats.likes, 
+      bg: '#fee2e2',
+      borderColor: '#ef4444'
+    },
+    { 
+      icon: <ShoppingBag size={22} color="#3b82f6" />, 
+      label: 'Productos', 
+      value: stats.totalProducts, 
+      bg: '#dbeafe',
+      borderColor: '#3b82f6'
+    }
   ];
 
   if (loading) {
@@ -67,28 +108,53 @@ export default function AdminDashboard({ token, API_URL }) {
 
   return (
     <div>
-      <h2 style={{ 
-        color: 'var(--primary-blue)', 
-        marginBottom: 'clamp(16px, 3vw, 24px)',
+      <div style={{
         display: 'flex',
+        justifyContent: 'space-between',
         alignItems: 'center',
-        gap: '10px',
-        fontSize: 'clamp(1.2rem, 2.5vw, 1.6rem)'
+        flexWrap: 'wrap',
+        gap: '12px',
+        marginBottom: '24px'
       }}>
-        📊 Panel de Control
-      </h2>
+        <h2 style={{ 
+          color: 'var(--primary-blue)', 
+          margin: 0,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          fontSize: 'clamp(1.2rem, 2.5vw, 1.6rem)'
+        }}>
+          📊 Panel de Control
+        </h2>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          padding: '8px 16px',
+          background: 'var(--bg-main)',
+          borderRadius: '10px',
+          border: '1px solid var(--border-color)'
+        }}>
+          <Award size={18} color="var(--primary-blue)" />
+          <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+            {new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+          </span>
+        </div>
+      </div>
 
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 150px), 1fr))',
-        gap: 'clamp(10px, 1.5vw, 16px)'
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 160px), 1fr))',
+        gap: 'clamp(12px, 1.5vw, 16px)'
       }}>
         {cards.map((card, index) => (
           <div key={index} className="card" style={{
             padding: 'clamp(14px, 1.5vw, 20px)',
             display: 'flex',
             alignItems: 'center',
-            gap: 'clamp(10px, 1.5vw, 14px)'
+            gap: 'clamp(10px, 1.5vw, 14px)',
+            borderLeft: `4px solid ${card.borderColor}`,
+            transition: 'transform 0.2s ease, box-shadow 0.2s ease'
           }}>
             <div style={{
               backgroundColor: card.bg,
@@ -97,14 +163,14 @@ export default function AdminDashboard({ token, API_URL }) {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              minWidth: '36px',
-              minHeight: '36px'
+              minWidth: '40px',
+              minHeight: '40px'
             }}>
               {card.icon}
             </div>
             <div>
               <div style={{ 
-                fontSize: 'clamp(0.6rem, 1vw, 0.75rem)', 
+                fontSize: 'clamp(0.6rem, 0.9vw, 0.7rem)', 
                 color: 'var(--text-muted)', 
                 fontWeight: 'bold',
                 textTransform: 'uppercase',
@@ -113,7 +179,7 @@ export default function AdminDashboard({ token, API_URL }) {
                 {card.label}
               </div>
               <div style={{ 
-                fontSize: 'clamp(1rem, 2vw, 1.3rem)', 
+                fontSize: 'clamp(1rem, 1.8vw, 1.3rem)', 
                 fontWeight: 'bold', 
                 color: 'var(--text-main)' 
               }}>
@@ -124,11 +190,12 @@ export default function AdminDashboard({ token, API_URL }) {
         ))}
       </div>
 
-      {/* Mensaje de bienvenida */}
       <div className="card" style={{
         marginTop: 'clamp(16px, 3vw, 24px)',
         textAlign: 'center',
-        padding: 'clamp(14px, 1.5vw, 20px)'
+        padding: 'clamp(14px, 1.5vw, 20px)',
+        background: 'linear-gradient(135deg, var(--bg-card), var(--bg-main))',
+        borderTop: '4px solid var(--primary-blue)'
       }}>
         <p style={{ 
           margin: 0, 
@@ -137,6 +204,13 @@ export default function AdminDashboard({ token, API_URL }) {
         }}>
           👋 ¡Bienvenida, Administradora! Tienes <strong style={{ color: 'var(--primary-blue)' }}>{stats.pendingAppointments}</strong> citas pendientes 
           y <strong style={{ color: 'var(--primary-green)' }}>{stats.pendingOrders}</strong> pedidos por confirmar.
+        </p>
+        <p style={{ 
+          margin: '6px 0 0 0',
+          fontSize: 'clamp(0.75rem, 1vw, 0.85rem)',
+          color: 'var(--text-muted)'
+        }}>
+          🎯 Total de pacientes: <strong>{stats.users}</strong> | Productos en catálogo: <strong>{stats.totalProducts}</strong>
         </p>
       </div>
     </div>

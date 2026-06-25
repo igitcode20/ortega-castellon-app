@@ -1,11 +1,12 @@
 // src/App.jsx
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Inicio from './components/Inicio';
 import Contacto from './components/Contacto';
 import Chatbot from './components/Chatbot';
 import Cart from './components/Cart';
+import FloatingQuote from './components/FloatingQuote';
 
 import LoginRegistro from './views/Login/LoginRegistro';
 import Muro from './views/Muro/Muro';
@@ -51,6 +52,9 @@ export default function App() {
 
   const isAdmin = user?.role === 'admin';
 
+  // Helper para clamp en JS
+  const clamp = (min, val, max) => Math.min(Math.max(min, val), max);
+
   return (
     <div style={{ 
       minHeight: '100vh', 
@@ -72,53 +76,42 @@ export default function App() {
         isAdmin={isAdmin}
       />
 
-      {/* Banner de bienvenida - SOLO PARA NO LOGUEADOS */}
+      {/* Frases flotantes - siempre visibles */}
+      <FloatingQuote />
+
+      {/* Banner de bienvenida - solo para no logueados */}
       {!user && activeTab !== 'cuenta' && (
         <div style={{
-          margin: 'clamp(12px, 2vw, 20px) auto',
-          padding: 'clamp(16px, 2vw, 25px) clamp(16px, 3vw, 30px)',
-          maxWidth: '90%',
+          margin: '12px auto 0 auto',
+          padding: 'clamp(12px, 1.5vw, 20px)',
+          maxWidth: '700px',
           width: '100%',
-          maxWidth: '800px',
-          background: 'linear-gradient(135deg, #0084cc12, #8cc63f12)',
+          background: 'linear-gradient(135deg, rgba(0,132,204,0.08), rgba(140,198,63,0.08))',
           border: '1px solid var(--border-color)',
-          borderRadius: 'clamp(14px, 2vw, 20px)',
-          textAlign: 'center',
-          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+          borderRadius: '12px',
+          textAlign: 'center'
         }}>
-          <div style={{ color: 'var(--primary-blue)', marginBottom: '8px' }}>
-            <Lock size={28} />
+          <div style={{ color: 'var(--primary-blue)' }}>
+            <Lock size={clamp(20, 2.5, 28)} />
           </div>
           <h3 style={{ 
-            margin: '0 0 8px 0', 
+            margin: '4px 0', 
             color: 'var(--primary-blue)', 
-            fontSize: 'clamp(1.1rem, 2.5vw, 1.5rem)' 
+            fontSize: 'clamp(0.95rem, 2, 1.2rem)' 
           }}>
             ¡Bienvenido a tu Clínica Digital!
           </h3>
           <p style={{ 
-            margin: '0 0 16px 0', 
-            fontSize: 'clamp(0.9rem, 1.8vw, 1.1rem)', 
+            margin: '4px 0 12px 0', 
+            fontSize: 'clamp(0.8rem, 1.5  , 0.95rem)', 
             color: 'var(--text-muted)' 
           }}>
-            Regístrate o inicia sesión para desbloquear el control de tus citas, acceso a farmacia y muro informativo.
+            Regístrate o inicia sesión para desbloquear citas, farmacia y muro informativo.
           </p>
           <button 
             onClick={() => setActiveTab('cuenta')} 
-            style={{
-              padding: 'clamp(10px, 1.5vw, 14px) clamp(24px, 4vw, 36px)',
-              background: 'var(--primary-blue)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '50px',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              fontSize: 'clamp(0.9rem, 1.8vw, 1.1rem)',
-              transition: 'transform 0.2s ease',
-              minHeight: '48px'
-            }}
-            onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
-            onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+            className="btn-primary"
+            style={{ fontSize: 'clamp(0.8rem, 1.2, 0.9rem)', padding: '8px 24px' }}
           >
             Comenzar ahora
           </button>
@@ -126,21 +119,20 @@ export default function App() {
       )}
 
       <main style={{ 
-        maxWidth: '1200px', 
+        maxWidth: '1100px', 
         width: '100%', 
-        margin: 'clamp(12px, 2vw, 20px) auto', 
-        padding: '0 clamp(12px, 2vw, 24px)', 
+        margin: '12px auto', 
+        padding: '0 clamp(10px, 2vw, 20px)', 
         flex: 1
       }}>
         
-        {/* VISTAS PÚBLICAS */}
+        {/* Vistas */}
         {activeTab === 'inicio' && <Inicio theme={theme} setActiveTab={setActiveTab} />}
         {activeTab === 'contacto' && <Contacto />}
         {activeTab === 'cuenta' && (
           <LoginRegistro API_URL={API_URL} setUser={setUser} setToken={setToken} setActiveTab={setActiveTab} />
         )}
 
-        {/* VISTAS DE CLIENTE */}
         {user && !isAdmin && activeTab === 'muro' && <Muro user={user} token={token} API_URL={API_URL} />}
         {user && !isAdmin && activeTab === 'farmacia' && (
           <Farmacia user={user} token={token} API_URL={API_URL} cart={cart} setCart={setCart} />
@@ -148,7 +140,6 @@ export default function App() {
         {user && !isAdmin && activeTab === 'citas' && <Citas token={token} API_URL={API_URL} />}
         {user && !isAdmin && activeTab === 'mis-pedidos' && <MisPedidos token={token} API_URL={API_URL} />}
 
-        {/* VISTAS DE ADMIN */}
         {isAdmin && activeTab === 'admin-dashboard' && <AdminDashboard token={token} API_URL={API_URL} />}
         {isAdmin && activeTab === 'admin-citas' && <AdminCitas token={token} API_URL={API_URL} />}
         {isAdmin && activeTab === 'admin-pedidos' && <AdminPedidos token={token} API_URL={API_URL} />}
@@ -162,32 +153,31 @@ export default function App() {
 
       {/* Footer */}
       <div style={{ 
-        padding: 'clamp(12px, 1.5vw, 20px) clamp(16px, 3vw, 24px)', 
+        padding: '12px 20px', 
         textAlign: 'center', 
         borderTop: '1px solid var(--border-color)', 
         marginTop: 'auto',
         backgroundColor: 'var(--bg-card)'
       }}>
         <p style={{ 
-          fontStyle: 'italic', 
-          fontWeight: '600', 
-          fontSize: 'clamp(0.85rem, 1.5vw, 1rem)', 
-          marginBottom: '4px' 
+          fontSize: 'clamp(0.75rem, 1.2vw, 0.9rem)', 
+          fontWeight: '600',
+          marginBottom: '2px',
+          color: 'var(--text-muted)'
         }}>
           "Tu salud en manos expertas, tu bienestar es nuestra prioridad"
         </p>
         <p style={{ 
-          fontSize: 'clamp(0.7rem, 1.2vw, 0.85rem)', 
-          fontWeight: 'bold', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center', 
-          gap: '6px', 
+          fontSize: 'clamp(0.6rem, 1vw, 0.75rem)', 
           color: 'var(--text-muted)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '4px',
           flexWrap: 'wrap'
         }}>
           © 2026 Todos los derechos reservados por SindyCastellon 
-          <Heart size={14} fill="#e53e3e" color="#e53e3e" />
+          <Heart size={clamp(10, 1.2, 14)} fill="#e53e3e" color="#e53e3e" />
         </p>
       </div>
 
@@ -196,6 +186,3 @@ export default function App() {
     </div>
   );
 }
-
-// Helper para clamp en JS
-const clamp = (min, val, max) => Math.min(Math.max(min, val), max);

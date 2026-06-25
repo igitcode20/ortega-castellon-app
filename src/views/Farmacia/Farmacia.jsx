@@ -1,12 +1,15 @@
 // src/views/Farmacia/Farmacia.jsx
 
-import React, { useState, useEffect } from 'react';
-import { ShoppingBag, Trash2, PlusCircle, Edit, Save, X, ShoppingCart, Package } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ShoppingBag, Trash2, PlusCircle, Edit, Save, X, ShoppingCart, Search, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 
-export default function Farmacia({ user, token, API_URL, cart, setCart }) {
+export default function Farmacia({ user, token, API_URL, setCart }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [showForm, setShowForm] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedImage, setSelectedImage] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -15,7 +18,8 @@ export default function Farmacia({ user, token, API_URL, cart, setCart }) {
     category: '',
     image: null
   });
-  const [showForm, setShowForm] = useState(false);
+
+  const isAdmin = user?.role === 'admin';
 
   const fetchProducts = async () => {
     try {
@@ -30,7 +34,30 @@ export default function Farmacia({ user, token, API_URL, cart, setCart }) {
     }
   };
 
-  useEffect(() => { fetchProducts(); }, []);
+  useEffect(() => {
+    let mounted = true;
+    const getProducts = async () => {
+      try {
+        if (mounted) setLoading(true);
+        const res = await fetch(`${API_URL}/products`);
+        const data = await res.json();
+        if (mounted) setProducts(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error('Error cargando productos:', error);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    getProducts();
+
+    return () => { mounted = false; };
+  }, [API_URL]);
+
+  const filteredProducts = products.filter(p => 
+    p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.category?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -39,6 +66,12 @@ export default function Farmacia({ user, token, API_URL, cart, setCart }) {
 
   const handleFileChange = (e) => {
     setFormData({ ...formData, image: e.target.files[0] });
+  };
+
+  const resetForm = () => {
+    setFormData({ name: '', description: '', price: '', stock: '', category: '', image: null });
+    setEditingProduct(null);
+    setShowForm(false);
   };
 
   const handleCreateProduct = async (e) => {
@@ -60,12 +93,11 @@ export default function Farmacia({ user, token, API_URL, cart, setCart }) {
 
       if (res.ok) {
         alert('✅ Producto agregado exitosamente');
-        setFormData({ name: '', description: '', price: '', stock: '', category: '', image: null });
-        setShowForm(false);
+        resetForm();
         fetchProducts();
       } else {
         const data = await res.json();
-        alert(`❌ Error: ${data.message || 'No se pudo agregar el producto'}`);
+        alert(`❌ Error: ${data.message || 'No se pudo agregar'}`);
       }
     } catch (error) {
       console.error('Error:', error);
@@ -105,13 +137,11 @@ export default function Farmacia({ user, token, API_URL, cart, setCart }) {
 
       if (res.ok) {
         alert('✅ Producto actualizado exitosamente');
-        setEditingProduct(null);
-        setFormData({ name: '', description: '', price: '', stock: '', category: '', image: null });
-        setShowForm(false);
+        resetForm();
         fetchProducts();
       } else {
         const data = await res.json();
-        alert(`❌ Error: ${data.message || 'No se pudo actualizar el producto'}`);
+        alert(`❌ Error: ${data.message || 'No se pudo actualizar'}`);
       }
     } catch (error) {
       console.error('Error:', error);
@@ -121,7 +151,6 @@ export default function Farmacia({ user, token, API_URL, cart, setCart }) {
 
   const handleDeleteProduct = async (id) => {
     if (!window.confirm('¿Estás seguro de eliminar este producto?')) return;
-    
     try {
       const res = await fetch(`${API_URL}/products/${id}`, {
         method: 'DELETE',
@@ -129,23 +158,22 @@ export default function Farmacia({ user, token, API_URL, cart, setCart }) {
       });
 
       if (res.ok) {
-        alert('✅ Producto eliminado exitosamente');
+        alert('✅ Producto eliminado');
         fetchProducts();
       } else {
-        alert('❌ Error al eliminar producto');
+        alert('❌ Error al eliminar');
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('❌ Error al eliminar producto');
+      alert('❌ Error al eliminar');
     }
   };
 
   const addToCart = (product) => {
     if (!user) {
-      alert('⚠️ Debes iniciar sesión para agregar productos al carrito.');
+      alert('⚠️ Inicia sesión para agregar al carrito');
       return;
     }
-
     setCart(prev => {
       const existing = prev.find(item => item.productId === product._id);
       if (existing) {
@@ -166,280 +194,381 @@ export default function Farmacia({ user, token, API_URL, cart, setCart }) {
     alert(`🛒 "${product.name}" agregado al carrito`);
   };
 
-  const isAdmin = user?.role === 'admin';
+  const scrollProducts = (direction) => {
+    const container = document.getElementById('product-scroll');
+    const scrollAmount = 280;
+    if (container) {
+      container.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+    }
+  };
 
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
-      
-      {/* Header con botón para agregar producto (solo admin) */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-        <h2 style={{ color: 'var(--primary-blue)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <ShoppingBag /> Catálogo de Medicamentos
-        </h2>
-        {isAdmin && (
-          <button
-            onClick={() => setShowForm(!showForm)}
-            style={{
-              padding: '10px 20px',
-              backgroundColor: showForm ? '#ef4444' : 'var(--primary-green)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}
-          >
-            {showForm ? <X size={18} /> : <PlusCircle size={18} />}
-            {showForm ? 'Cancelar' : 'Agregar Producto'}
-          </button>
-        )}
-      </div>
-
-      {/* Formulario para agregar/editar producto */}
-      {showForm && (
-        <div style={{
-          backgroundColor: 'var(--bg-card)',
-          padding: '25px',
-          borderRadius: '12px',
-          border: '1px solid var(--border-color)',
-          boxShadow: '0 4px 15px rgba(0,0,0,0.05)'
-        }}>
-          <h3 style={{ color: 'var(--primary-blue)', marginBottom: '15px' }}>
-            {editingProduct ? '✏️ Editar Producto' : '➕ Nuevo Producto'}
-          </h3>
-          <form onSubmit={editingProduct ? handleUpdateProduct : handleCreateProduct} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <input
-                type="text"
-                name="name"
-                placeholder="Nombre del producto *"
-                value={formData.name}
-                onChange={handleInputChange}
-                required
-                style={{
-                  padding: '10px',
-                  borderRadius: '8px',
-                  border: '1px solid var(--border-color)',
-                  backgroundColor: 'var(--bg-main)',
-                  color: 'var(--text-main)'
-                }}
-              />
-              <input
-                type="text"
-                name="category"
-                placeholder="Categoría *"
-                value={formData.category}
-                onChange={handleInputChange}
-                required
-                style={{
-                  padding: '10px',
-                  borderRadius: '8px',
-                  border: '1px solid var(--border-color)',
-                  backgroundColor: 'var(--bg-main)',
-                  color: 'var(--text-main)'
-                }}
-              />
-            </div>
-            <textarea
-              name="description"
-              placeholder="Descripción *"
-              value={formData.description}
-              onChange={handleInputChange}
-              required
-              rows="2"
-              style={{
-                padding: '10px',
-                borderRadius: '8px',
-                border: '1px solid var(--border-color)',
-                backgroundColor: 'var(--bg-main)',
-                color: 'var(--text-main)',
-                resize: 'vertical'
-              }}
-            />
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <input
-                type="number"
-                name="price"
-                placeholder="Precio (C$) *"
-                value={formData.price}
-                onChange={handleInputChange}
-                required
-                min="0"
-                step="0.01"
-                style={{
-                  padding: '10px',
-                  borderRadius: '8px',
-                  border: '1px solid var(--border-color)',
-                  backgroundColor: 'var(--bg-main)',
-                  color: 'var(--text-main)'
-                }}
-              />
-              <input
-                type="number"
-                name="stock"
-                placeholder="Stock *"
-                value={formData.stock}
-                onChange={handleInputChange}
-                required
-                min="0"
-                style={{
-                  padding: '10px',
-                  borderRadius: '8px',
-                  border: '1px solid var(--border-color)',
-                  backgroundColor: 'var(--bg-main)',
-                  color: 'var(--text-main)'
-                }}
-              />
-            </div>
-            <div>
-              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', fontSize: '0.85rem' }}>
-                {editingProduct ? '📸 Cambiar imagen (opcional)' : '📸 Imagen del producto *'}
-              </label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                required={!editingProduct}
-                style={{ width: '100%' }}
-              />
-            </div>
+  // Modal para ver imagen
+  if (selectedImage) {
+    return (
+      <div className="modal-overlay" onClick={() => setSelectedImage(null)}>
+        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
             <button
-              type="submit"
+              onClick={() => setSelectedImage(null)}
               style={{
-                padding: '12px',
-                backgroundColor: editingProduct ? 'var(--primary-blue)' : 'var(--primary-green)',
+                background: 'rgba(255,255,255,0.1)',
                 color: 'white',
-                border: 'none',
+                padding: '4px 12px',
                 borderRadius: '8px',
-                fontWeight: 'bold',
-                fontSize: '1rem',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px'
+                border: '1px solid rgba(255,255,255,0.2)'
               }}
             >
-              {editingProduct ? <Save size={18} /> : <PlusCircle size={18} />}
-              {editingProduct ? 'Actualizar Producto' : 'Agregar Producto'}
+              ✕ Cerrar
             </button>
+          </div>
+          <img src={selectedImage} alt="Producto" />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      
+      {/* Header con buscador estilo Facebook */}
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        flexWrap: 'wrap', 
+        gap: '12px' 
+      }}>
+        <h2 style={{ 
+          color: 'var(--primary-blue)', 
+          margin: 0, 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '8px',
+          fontSize: '1.2rem'
+        }}>
+          <ShoppingBag size={20} /> Farmacia
+        </h2>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+          <div style={{ position: 'relative', minWidth: '160px' }}>
+            <Search size={16} style={{ 
+              position: 'absolute', 
+              left: '10px', 
+              top: '50%', 
+              transform: 'translateY(-50%)',
+              color: 'var(--text-muted)'
+            }} />
+            <input
+              type="text"
+              placeholder="Buscar..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{ 
+                padding: '6px 10px 6px 32px',
+                borderRadius: '20px',
+                border: '1px solid var(--border-color)',
+                fontSize: '0.85rem',
+                minWidth: '140px',
+                minHeight: '34px'
+              }}
+            />
+          </div>
+          {isAdmin && (
+            <button
+              onClick={() => setShowForm(!showForm)}
+              className="btn-success"
+              style={{ fontSize: '0.85rem', padding: '6px 14px' }}
+            >
+              {showForm ? <X size={16} /> : <PlusCircle size={16} />}
+              {showForm ? 'Cancelar' : 'Agregar'}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Formulario admin */}
+      {isAdmin && showForm && (
+        <div className="card" style={{ borderTop: '3px solid var(--primary-green)' }}>
+          <h4 style={{ color: 'var(--primary-blue)', marginBottom: '12px' }}>
+            {editingProduct ? '✏️ Editar' : '➕ Nuevo Producto'}
+          </h4>
+          <form onSubmit={editingProduct ? handleUpdateProduct : handleCreateProduct} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              <input type="text" name="name" placeholder="Nombre *" value={formData.name} onChange={handleInputChange} required />
+              <input type="text" name="category" placeholder="Categoría *" value={formData.category} onChange={handleInputChange} required />
+            </div>
+            <textarea name="description" placeholder="Descripción *" value={formData.description} onChange={handleInputChange} required rows="2" />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              <input type="number" name="price" placeholder="Precio (C$) *" value={formData.price} onChange={handleInputChange} required min="0" step="0.01" />
+              <input type="number" name="stock" placeholder="Stock *" value={formData.stock} onChange={handleInputChange} required min="0" />
+            </div>
+            <div>
+              <label style={{ fontSize: '0.85rem', fontWeight: '600' }}>
+                {editingProduct ? '📸 Cambiar imagen (opcional)' : '📸 Imagen *'}
+              </label>
+              <input type="file" accept="image/*" onChange={handleFileChange} required={!editingProduct} />
+            </div>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button type="submit" className={editingProduct ? 'btn-primary' : 'btn-success'} style={{ flex: 1 }}>
+                {editingProduct ? <Save size={16} /> : <PlusCircle size={16} />}
+                {editingProduct ? 'Actualizar' : 'Agregar'}
+              </button>
+              {editingProduct && (
+                <button type="button" className="btn-danger" onClick={resetForm}>Cancelar</button>
+              )}
+            </div>
           </form>
         </div>
       )}
 
-      {/* Grid de productos */}
+      {/* Catálogo horizontal estilo Facebook Marketplace */}
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
-          ⏳ Cargando productos...
-        </div>
-      ) : products.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
-          🏥 No hay productos disponibles en la farmacia.
+        <div style={{ textAlign: 'center', padding: '30px', color: 'var(--text-muted)' }}>⏳ Cargando...</div>
+      ) : filteredProducts.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '30px', color: 'var(--text-muted)' }}>
+          {searchTerm ? '🔍 No se encontraron productos' : '🏥 No hay productos disponibles'}
         </div>
       ) : (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
-          gap: '20px'
-        }}>
-          {products.map(product => (
-            <div key={product._id} style={{
-              backgroundColor: 'var(--bg-card)',
-              padding: '15px',
-              borderRadius: '12px',
-              border: '1px solid var(--border-color)',
-              textAlign: 'center',
-              transition: 'transform 0.2s ease',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
-            }}>
-              <img
-                src={product.image}
-                alt={product.name}
+        <div style={{ position: 'relative' }}>
+          {/* Botones de navegación */}
+          {filteredProducts.length > 4 && (
+            <>
+              <button
+                onClick={() => scrollProducts(-1)}
                 style={{
-                  width: '100%',
-                  height: '120px',
-                  objectFit: 'contain',
-                  marginBottom: '10px',
-                  borderRadius: '8px'
+                  position: 'absolute',
+                  left: '-8px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  zIndex: 5,
+                  background: 'var(--bg-card)',
+                  borderRadius: '50%',
+                  width: '32px',
+                  height: '32px',
+                  padding: 0,
+                  boxShadow: 'var(--shadow-md)',
+                  border: '1px solid var(--border-color)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}
-              />
-              <h4 style={{ fontSize: '1rem', margin: '8px 0', color: 'var(--text-main)' }}>{product.name}</h4>
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '4px 0' }}>{product.description}</p>
-              <p style={{ color: 'var(--primary-green)', fontWeight: 'bold', fontSize: '1.1rem', margin: '8px 0' }}>
-                C${product.price.toFixed(2)}
-              </p>
-              <span style={{
-                fontSize: '0.75rem',
-                color: product.stock > 0 ? 'var(--primary-green)' : '#ef4444',
-                display: 'block',
-                marginBottom: '10px'
-              }}>
-                {product.stock > 0 ? `📦 ${product.stock} disponibles` : '❌ Agotado'}
-              </span>
+              >
+                <ChevronLeft size={18} />
+              </button>
+              <button
+                onClick={() => scrollProducts(1)}
+                style={{
+                  position: 'absolute',
+                  right: '-8px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  zIndex: 5,
+                  background: 'var(--bg-card)',
+                  borderRadius: '50%',
+                  width: '32px',
+                  height: '32px',
+                  padding: 0,
+                  boxShadow: 'var(--shadow-md)',
+                  border: '1px solid var(--border-color)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <ChevronRight size={18} />
+              </button>
+            </>
+          )}
 
-              {/* Botones para admin */}
-              {isAdmin && (
-                <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '10px' }}>
-                  <button
-                    onClick={() => handleEditProduct(product)}
-                    style={{
-                      padding: '6px 12px',
-                      backgroundColor: 'var(--primary-blue)',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontSize: '0.8rem'
-                    }}
-                  >
-                    <Edit size={14} style={{ display: 'inline', marginRight: '4px' }} />
-                    Editar
-                  </button>
-                  <button
-                    onClick={() => handleDeleteProduct(product._id)}
-                    style={{
-                      padding: '6px 12px',
-                      backgroundColor: '#ef4444',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontSize: '0.8rem'
-                    }}
-                  >
-                    <Trash2 size={14} style={{ display: 'inline', marginRight: '4px' }} />
-                    Eliminar
-                  </button>
-                </div>
-              )}
-
-              {/* Botón para agregar al carrito (solo si hay stock) */}
-              {product.stock > 0 && (
-                <button
-                  onClick={() => addToCart(product)}
+          <div
+            id="product-scroll"
+            style={{
+              display: 'flex',
+              gap: '14px',
+              overflowX: 'auto',
+              padding: '8px 4px 12px 4px',
+              scrollbarWidth: 'thin',
+              scrollSnapType: 'x mandatory',
+              WebkitOverflowScrolling: 'touch',
+              msOverflowStyle: '-ms-autohiding-scrollbar'
+            }}
+          >
+            {filteredProducts.map(product => (
+              <div
+                key={product._id}
+                style={{
+                  flex: '0 0 180px',
+                  scrollSnapAlign: 'start',
+                  background: 'var(--bg-card)',
+                  borderRadius: 'var(--radius)',
+                  border: '1px solid var(--border-color)',
+                  padding: '12px',
+                  boxShadow: 'var(--shadow-sm)',
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                  e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
+                }}
+              >
+                {/* Imagen clickeable para modal */}
+                <div
+                  onClick={() => setSelectedImage(product.image)}
                   style={{
+                    position: 'relative',
                     width: '100%',
-                    padding: '8px',
-                    backgroundColor: 'var(--primary-blue)',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '6px',
+                    height: '140px',
+                    borderRadius: 'var(--radius-sm)',
+                    overflow: 'hidden',
+                    background: '#f8fafc',
                     cursor: 'pointer',
-                    fontWeight: 'bold',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px'
+                    marginBottom: '8px'
                   }}
                 >
-                  <ShoppingCart size={16} /> Agregar al Carrito
-                </button>
-              )}
-            </div>
-          ))}
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'contain',
+                      transition: 'transform 0.3s ease'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                  />
+                  <div
+                    style={{
+                      position: 'absolute',
+                      bottom: '4px',
+                      right: '4px',
+                      background: 'rgba(0,0,0,0.5)',
+                      borderRadius: '50%',
+                      padding: '4px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'white',
+                      fontSize: '0.6rem'
+                    }}
+                  >
+                    <Eye size={12} />
+                  </div>
+                </div>
+
+                <h4 style={{
+                  fontSize: '0.9rem',
+                  margin: '4px 0 2px 0',
+                  fontWeight: '700',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}>
+                  {product.name}
+                </h4>
+                <p style={{
+                  fontSize: '0.75rem',
+                  color: 'var(--text-muted)',
+                  margin: '0 0 4px 0',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                  minHeight: '32px'
+                }}>
+                  {product.description}
+                </p>
+
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginTop: 'auto',
+                  paddingTop: '6px',
+                  borderTop: '1px solid var(--border-color)'
+                }}>
+                  <span style={{
+                    fontWeight: 'bold',
+                    color: 'var(--primary-green)',
+                    fontSize: '0.95rem'
+                  }}>
+                    C${product.price.toFixed(2)}
+                  </span>
+                  <span style={{
+                    fontSize: '0.65rem',
+                    color: product.stock > 0 ? 'var(--primary-green)' : '#ef4444',
+                    fontWeight: '600'
+                  }}>
+                    {product.stock > 0 ? `📦 ${product.stock}` : '❌ Agotado'}
+                  </span>
+                </div>
+
+                {/* Botones admin */}
+                {isAdmin && (
+                  <div style={{ display: 'flex', gap: '4px', marginTop: '6px' }}>
+                    <button
+                      onClick={() => handleEditProduct(product)}
+                      style={{
+                        flex: 1,
+                        padding: '4px 8px',
+                        background: 'var(--primary-blue)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        fontSize: '0.65rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '2px'
+                      }}
+                    >
+                      <Edit size={12} /> Editar
+                    </button>
+                    <button
+                      onClick={() => handleDeleteProduct(product._id)}
+                      style={{
+                        flex: 1,
+                        padding: '4px 8px',
+                        background: '#ef4444',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        fontSize: '0.65rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '2px'
+                      }}
+                    >
+                      <Trash2 size={12} /> Eliminar
+                    </button>
+                  </div>
+                )}
+
+                {product.stock > 0 && (
+                  <button
+                    onClick={() => addToCart(product)}
+                    className="btn-primary"
+                    style={{
+                      width: '100%',
+                      padding: '6px',
+                      fontSize: '0.75rem',
+                      marginTop: '6px',
+                      borderRadius: '6px'
+                    }}
+                  >
+                    <ShoppingCart size={14} /> Agregar
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
